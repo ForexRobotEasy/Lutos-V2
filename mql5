@@ -1,0 +1,67 @@
+mql5
+/*
+Program Name: Lutos V2
+Developer Site: forexroboteasy.com
+Development Name: Forex Robot Easy Team
+*/
+
+// Trading Functions
+// Support for Multiple Currency Pairs
+string[] currencyPairs = {'USDCHF', 'NZDCHF', 'CADCHF', 'EURAUD', 'EURCAD', 'AUDJPY', 'AUDNZD', 'EURJPY', 'USDCAD', 'CADJPY', 'NZDCAD', 'GBPCAD', 'EURGBP'};
+int currentPairIndex = 0;
+
+// Minimum Deposit Requirement
+double minimumDeposit = 100.00;
+
+// Timeframe Optimization
+enum Timeframe {M5, M1}
+Timeframe selectedTimeframe = Timeframe.M5;
+
+// Risk Management
+double stopLossLimit = 35.00;
+
+// Main Program
+void OnStart()
+{
+    // Check if minimum deposit requirement is met
+    if(AccountInfoDouble(ACCOUNT_BALANCE) < minimumDeposit)
+    {
+        Print('Insufficient funds. Minimum deposit of ', minimumDeposit, ' USD required.');
+        return;
+    }
+
+    // Select the current currency pair
+    string currentPair = currencyPairs[currentPairIndex];
+
+    // Set the selected timeframe
+    if(selectedTimeframe == Timeframe.M5)
+    {
+        ChartSetInteger(0, CHART_PERIOD, PERIOD_M5);
+    }
+    else if(selectedTimeframe == Timeframe.M1)
+    {
+        ChartSetInteger(0, CHART_PERIOD, PERIOD_M1);
+    }
+
+    // Place a trade with the selected currency pair
+    double entryPrice = MarketInfo(currentPair, MODE_BID);
+    double stopLossPrice = entryPrice - stopLossLimit * MarketInfo(currentPair, MODE_POINT);
+
+    Print('Placing trade on ', currentPair, ' at price ', entryPrice);
+    Print('Setting stop loss at ', stopLossPrice);
+}
+
+// Logical Conclusion
+void OnTick()
+{
+    // Check for trade closure or change of currency pair
+    if(currentPairIndex == currencyPairs.Length - 1)
+    {
+        Print('All trades have been placed.');
+        return;
+    }
+
+    Print('Trade on ', currencyPairs[currentPairIndex], ' closed.');
+    currentPairIndex++;
+    OnStart();
+}
